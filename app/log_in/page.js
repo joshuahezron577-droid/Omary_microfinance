@@ -210,7 +210,7 @@ function SignInForm() {
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
               Sign in to your account
             </h2>
-            <p className="text-sm text-neutral-400 mt-1">
+            <p className="text-sm text-neutral-400 mt-2 mb-6">
               Manage your loans, repayments, and growth.
             </p>
           </div>
@@ -227,7 +227,7 @@ function SignInForm() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label className="block text-[11px] font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
                 Email Address

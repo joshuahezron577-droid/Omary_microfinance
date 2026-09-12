@@ -263,6 +263,42 @@ export default function DashboardPage() {
                 </p>
               </div>
 
+              {/* ── DUE DATE WARNING BANNER ──────────────────────────── */}
+              {(() => {
+                const active = loans.find(l => l.status === 'active' && l.due_date);
+                if (!active) return null;
+
+                const today    = new Date(); today.setHours(0,0,0,0);
+                const due      = new Date(active.due_date); due.setHours(0,0,0,0);
+                const diffDays = Math.round((due - today) / (1000 * 60 * 60 * 24));
+                const dueFmt   = new Date(active.due_date).toLocaleDateString('en-TZ', { day: 'numeric', month: 'short', year: 'numeric' });
+
+                // Inaonyesha tu kama siku 7 au chini, leo, au imepita
+                if (diffDays > 7) return null;
+
+                let icon, message, styles;
+                if (diffDays < 0) {
+                  icon    = '🔴';
+                  message = `Umechelewa siku ${Math.abs(diffDays)} — tarehe ya kulipa ilikuwa ${dueFmt}. Wasiliana na admin haraka.`;
+                  styles  = 'bg-rose-500/10 border-rose-500/30 text-rose-400';
+                } else if (diffDays === 0) {
+                  icon    = '🔔';
+                  message = `Leo ni siku ya kulipa mkopo wako — ${dueFmt}. Hakikisha malipo yamefanywa.`;
+                  styles  = 'bg-rose-500/10 border-rose-500/30 text-rose-400';
+                } else {
+                  icon    = '⚠️';
+                  message = `Tarehe yako ya malipo inakaribia — ${dueFmt} (siku ${diffDays} zimebaki). Jiandae kulipa.`;
+                  styles  = 'bg-amber-500/10 border-amber-500/30 text-amber-400';
+                }
+
+                return (
+                  <div className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-sm font-medium ${styles}`}>
+                    <span className="text-base shrink-0 mt-0.5">{icon}</span>
+                    <span>{message}</span>
+                  </div>
+                );
+              })()}
+
               {/* Stats Cards — data halisi */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatsCard

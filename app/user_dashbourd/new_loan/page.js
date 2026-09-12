@@ -8,12 +8,37 @@ import {
 } from 'react-icons/hi';
 import { supabase } from '@/lib/superbase';
 
+// ─── Toast Component ─────────────────────────────────────────────────────────
+function Toast({ toast }) {
+  if (!toast) return null;
+  return (
+    <div className={`fixed top-5 right-5 z-[9999] flex items-start gap-3 px-4 py-3 rounded-xl border shadow-2xl text-sm font-medium max-w-sm transition-all animate-in fade-in slide-in-from-top-2 ${
+      toast.type === 'success'
+        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+        : toast.type === 'warning'
+        ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+        : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+    }`}>
+      <span className="mt-0.5 shrink-0 text-base">
+        {toast.type === 'success' ? '✓' : toast.type === 'warning' ? '⚠' : '✕'}
+      </span>
+      <span>{toast.message}</span>
+    </div>
+  );
+}
+
 export default function RequestLoan({ userId, onSuccess }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [isPesapalModalOpen, setIsPesapalModalOpen] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState('');
+  const [toast, setToast] = useState(null);
+
+  const showToast = (type, message, duration = 4000) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), duration);
+  };
 
   // Settings kutoka DB
   const [maxLoanLimit, setMaxLoanLimit]         = useState(10000000); // default fallback
@@ -78,13 +103,12 @@ export default function RequestLoan({ userId, onSuccess }) {
 
   const nextStep = (e) => {
     e.preventDefault();
-    // Angalia max loan limit kwenye step 1
     if (step === 1 && principal > maxLoanLimit) {
-      alert(`Loan amount exceeds the maximum limit of TZS ${maxLoanLimit.toLocaleString('en-TZ')}. Please enter a lower amount.`);
+      showToast('error', `Kiasi kimezidi kikomo cha TZS ${maxLoanLimit.toLocaleString('en-TZ')}. Weka kiasi kidogo zaidi.`);
       return;
     }
     if (step === 1 && principal <= 0) {
-      alert('Please enter a valid loan amount.');
+      showToast('error', 'Tafadhali weka kiasi halisi cha mkopo.');
       return;
     }
     setStep(prev => prev + 1);
@@ -97,7 +121,7 @@ export default function RequestLoan({ userId, onSuccess }) {
   const handleOpenPaymentModal = (e) => {
     e.preventDefault();
     if (!agreed) {
-      alert("Please read and agree to the Terms & Conditions before proceeding.");
+      showToast('warning', 'Tafadhali soma na kukubaliana na Masharti & Hali kabla ya kuendelea.');
       return;
     }
     setIsPesapalModalOpen(true);
@@ -105,7 +129,7 @@ export default function RequestLoan({ userId, onSuccess }) {
 
   const handlePesapalCheckoutConfirm = async () => {
     if (!selectedMethod) {
-      alert("Tafadhali chagua mtandao wa malipo kwanza (M-Pesa, Tigo Pesa, Airtel Money, au Cards).");
+      showToast('warning', 'Tafadhali chagua mtandao wa malipo kwanza.');
       return;
     }
 
@@ -120,7 +144,7 @@ export default function RequestLoan({ userId, onSuccess }) {
       }
 
       if (!uid) {
-        alert("Session expired. Please log in again.");
+        showToast('error', 'Muda wa kikao umekwisha. Tafadhali ingia tena.');
         setLoading(false);
         return;
       }
@@ -190,7 +214,7 @@ export default function RequestLoan({ userId, onSuccess }) {
 
       // 4. Mafanikio — reset fomu
       setIsPesapalModalOpen(false);
-      alert(`Loan application submitted successfully! You will be notified after admin review.`);
+      showToast('success', 'Ombi lako la mkopo limewasilishwa! Utaarifiwa baada ya admin kukagua.');
       setFormData(initialFormState);
       setStep(1);
       setAgreed(false);
@@ -198,7 +222,7 @@ export default function RequestLoan({ userId, onSuccess }) {
       if (onSuccess) onSuccess();
 
     } catch (err) {
-      alert(`Hitilafu wakati wa kuwasilisha: ${err.message}`);
+      showToast('error', `Hitilafu wakati wa kuwasilisha: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -206,6 +230,8 @@ export default function RequestLoan({ userId, onSuccess }) {
 
   return (
     <div className="bg-[#121212] border border-zinc-800 p-6 md:p-8 rounded-2xl shadow-xl max-w-4xl mx-auto text-white relative">
+      
+      <Toast toast={toast} />
       
       {/* HEADER TITLE */}
       <div className="mb-6 border-b border-zinc-800 pb-4">
@@ -666,7 +692,7 @@ export default function RequestLoan({ userId, onSuccess }) {
         <form onSubmit={(e) => {
           e.preventDefault();
           if (!formData.idDocument) {
-            alert('Please upload your ID document before proceeding.');
+            showToast('warning', 'Tafadhali pakia hati yako ya utambulisho (ID) kabla ya kuendelea.');
             return;
           }
           setStep(prev => prev + 1);
@@ -741,14 +767,14 @@ export default function RequestLoan({ userId, onSuccess }) {
                     // Validate type
                     const allowed = ['image/jpeg', 'image/png', 'application/pdf'];
                     if (!allowed.includes(file.type)) {
-                      alert('Invalid file type. Please upload JPG, PNG, or PDF only.');
+                      showToast('error', 'Aina ya faili hairuhusiwi. Pakia JPG, PNG, au PDF tu.');
                       e.target.value = '';
                       return;
                     }
 
                     // Validate size — 2MB
                     if (file.size > 2 * 1024 * 1024) {
-                      alert(`File is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum allowed size is 2MB.`);
+                      showToast('error', `Faili ni kubwa sana (${(file.size / 1024 / 1024).toFixed(2)}MB). Ukubwa wa juu ni 2MB.`);
                       e.target.value = '';
                       return;
                     }

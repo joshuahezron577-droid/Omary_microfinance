@@ -43,6 +43,21 @@ const parseGuarantorFromDescription = (description) => {
 };
 
 
+// ─── Due date status helper ───────────────────────────────────────────────────
+const getDueDateInfo = (dueDate) => {
+  if (!dueDate) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate);
+  due.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((due - today) / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 7)   return { label: `Siku ${diffDays} zimebaki`,           color: 'text-amber-400',  badge: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' };
+  if (diffDays > 0)   return { label: `Inakaribia — siku ${diffDays} ⚠`,     color: 'text-orange-400', badge: 'bg-orange-500/10 border-orange-500/20 text-orange-400' };
+  if (diffDays === 0) return { label: 'Due leo!',                             color: 'text-rose-400',   badge: 'bg-rose-500/10 border-rose-500/20 text-rose-400' };
+  return              { label: `Imechelewa siku ${Math.abs(diffDays)} 🔴`,    color: 'text-rose-400',   badge: 'bg-rose-500/10 border-rose-500/20 text-rose-400' };
+};
+
 export default function ActiveLoansPage() {
   const [loans, setLoans] = useState([]);
   const [guarantors, setGuarantors] = useState({}); // { [loan_id]: guarantor }
@@ -362,11 +377,23 @@ export default function ActiveLoansPage() {
                     <p className="text-[10px] uppercase tracking-wider text-neutral-500 font-medium flex items-center gap-1">
                       <Calendar size={11} /> Tarehe ya Malipo
                     </p>
-                    <p className="font-semibold text-amber-400 mt-1">
-                      {loan.due_date
-                        ? new Date(loan.due_date).toLocaleDateString('en-TZ', { day: 'numeric', month: 'short', year: 'numeric' })
-                        : '—'}
-                    </p>
+                    {loan.due_date ? (() => {
+                      const info = getDueDateInfo(loan.due_date);
+                      return (
+                        <div className="mt-1 space-y-1">
+                          <p className={`font-semibold text-sm ${info?.color || 'text-amber-400'}`}>
+                            {new Date(loan.due_date).toLocaleDateString('en-TZ', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                          {info && loan.status !== 'completed' && (
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${info.badge}`}>
+                              {info.label}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })() : (
+                      <p className="font-semibold text-neutral-500 mt-1">—</p>
+                    )}
                   </div>
                 </div>
 

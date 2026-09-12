@@ -6,6 +6,7 @@ import Sidebar from '../../components/admin/SideBar';
 import TopNav from '../../components/admin/TopNav';
 import StatsCards from '../../components/admin/StatsCards';
 import LineChartSection from '../../components/admin/LineChartSecton';
+import DonutChart from '../../components/admin/DonutChart';
 import PendingRequestsTable from '../../components/admin/PendingReguestTable';
 import Footer from '../../components/admin/Footer';
 
@@ -61,7 +62,17 @@ export default function AdminDashboard() {
           </div>
 
           <StatsCards />
-          <LineChartSection />
+
+          {/* Donut Chart + Line Chart side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+            <div className="lg:col-span-1">
+              <DonutChart />
+            </div>
+            <div className="lg:col-span-2">
+              <LineChartSection />
+            </div>
+          </div>
+
           <PendingRequestsTable />
         </main>
         <Footer />

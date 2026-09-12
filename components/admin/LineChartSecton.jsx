@@ -86,7 +86,7 @@ function LineChart({ data }) {
   return (
     <div className="relative w-full">
       {/* Y-axis labels */}
-      <div className="absolute left-0 top-0 h-36 flex flex-col justify-between pointer-events-none pr-1" style={{width: 36}}>
+      <div className="absolute left-0 top-0 h-48 flex flex-col justify-between pointer-events-none pr-1" style={{width: 36}}>
         {[...yLevels].reverse().map((v, i) => (
           <span key={i} className="text-[9px] text-neutral-600 text-right leading-none">
             {fmtAxis(v)}
@@ -98,7 +98,7 @@ function LineChart({ data }) {
       <div className="ml-9">
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          className="w-full h-36 overflow-visible"
+          className="w-full h-48 overflow-visible"
           preserveAspectRatio="none"
         >
           <defs>
@@ -239,7 +239,7 @@ export default function LineChartSection() {
   const activeMonths = chartData.filter(d => d.amount > 0).length;
 
   return (
-    <div className="bg-[#121614] border border-neutral-800/80 rounded-2xl p-6 shadow-xl">
+    <div className="bg-[#121614] border border-neutral-800/80 rounded-2xl p-6 shadow-xl h-full flex flex-col">
 
       {/* Header */}
       <div className="flex items-start justify-between mb-5">
@@ -282,7 +282,7 @@ export default function LineChartSection() {
 
       {/* Loading */}
       {loading && (
-        <div className="h-48 flex items-center justify-center">
+        <div className="h-64 flex items-center justify-center">
           <div className="flex flex-col items-center gap-2">
             <RefreshCw size={20} className="text-amber-400 animate-spin" />
             <p className="text-xs text-zinc-500">Loading chart data...</p>
@@ -292,7 +292,7 @@ export default function LineChartSection() {
 
       {/* Error */}
       {!loading && error && (
-        <div className="h-48 flex items-center justify-center">
+        <div className="h-64 flex items-center justify-center">
           <div className="text-center">
             <AlertTriangle size={20} className="text-rose-400 mx-auto mb-2" />
             <p className="text-xs text-rose-400">{error}</p>

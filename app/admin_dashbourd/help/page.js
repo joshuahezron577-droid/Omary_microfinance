@@ -36,7 +36,7 @@ const WORKFLOW = [
       'Mkopo unapofikia 100% unabadilika kuwa "Completed" kiotomatiki',
       'Tarehe ya malipo inasogea mbele kwa mwezi mmoja baada ya kila malipo',
       'Bonyeza "Maelezo" / "Ona Maelezo" kuona taarifa kamili za Guarantor na mteja',
-      'Mkopo uliopita tarehe ya malipo unaonyesha badge ya "Imechelewa" (njano)',
+      'Tarehe ya malipo inaonyesha badge ya rangi: kijani (siku 8+), orange (siku 1-7 ⚠), nyekundu (leo au imechelewa 🔴)',
     ],
   },
   {
@@ -164,7 +164,7 @@ export default function AdminHelpPage() {
         {/* RIGHT: Contact */}
         <div className="space-y-6">
           <div>
-            <h3 className="text-xl font-bold text-white mb-2">Wasiliana Nasi</h3>
+            <h3 className="text-xl font-bold text-white mb-2">For Further Help, Contact Us</h3>
             <div className="w-10 h-1 bg-amber-400 rounded-full" />
           </div>
 
