@@ -66,9 +66,26 @@ function buildSchedule(loan) {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function ActiveLoanPage() {
-  const [loans, setLoans]     = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
+  const [loans, setLoans]           = useState([]);
+  const [guarantors, setGuarantors] = useState({});
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
+
+  // Parse guarantor kutoka description ya zamani (fallback)
+  const parseGuarantorFromDesc = (desc) => {
+    if (!desc) return null;
+    const gMatch = desc.match(/Guarantor:\s*([^(]+)\(([^)]+)\)/i);
+    const oMatch = desc.match(/Occupation:\s*([^|]+)/i);
+    const wMatch = desc.match(/Workplace:\s*([^|]+)/i);
+    if (!gMatch) return null;
+    return {
+      full_name: gMatch[1].trim(),
+      phone_no:  gMatch[2].trim(),
+      occupation: oMatch ? oMatch[1].trim() : null,
+      workplace:  wMatch ? wMatch[1].trim() : null,
+      _fromDescription: true,
+    };
+  };
 
   const fetchLoans = useCallback(async () => {
     setLoading(true);
@@ -87,7 +104,7 @@ export default function ActiveLoanPage() {
       .select(`
         id, amount, interest_rate, duration, purpose,
         payment_provider, account_number,
-        amount_paid, due_date, created_at, status
+        amount_paid, due_date, created_at, status, description
       `)
       .eq('user_id', user.id)
       .in('status', ['active', 'completed'])
@@ -96,7 +113,20 @@ export default function ActiveLoanPage() {
     if (err) {
       setError(err.message);
     } else {
-      setLoans(data || []);
+      const loanList = data || [];
+      setLoans(loanList);
+
+      // Pata guarantors kwa mikopo hii
+      if (loanList.length > 0) {
+        const { data: gData } = await supabase
+          .from('guarantors')
+          .select('loan_id, full_name, relationship, phone_no, email, occupation, workplace, national_id, physical_address')
+          .in('loan_id', loanList.map(l => l.id));
+
+        const gMap = {};
+        (gData || []).forEach(g => { gMap[g.loan_id] = g; });
+        setGuarantors(gMap);
+      }
     }
 
     setLoading(false);
@@ -348,6 +378,76 @@ export default function ActiveLoanPage() {
                       )}
                     </div>
                   )}
+
+                  {/* Guarantor info */}
+                  {(() => {
+                    const g = guarantors[loan.id] || parseGuarantorFromDesc(loan.description);
+                    return (
+                      <div className="bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4 space-y-3">
+                        <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
+                          Guarantor Information
+                          {g?._fromDescription && (
+                            <span className="ml-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px]">
+                              Partial
+                            </span>
+                          )}
+                        </p>
+                        {g ? (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                            <div>
+                              <p className="text-[10px] text-zinc-600 uppercase">Full Name</p>
+                              <p className="text-white font-semibold mt-0.5">{g.full_name || '—'}</p>
+                            </div>
+                            {g.relationship && (
+                              <div>
+                                <p className="text-[10px] text-zinc-600 uppercase">Relationship</p>
+                                <p className="text-zinc-300 mt-0.5">{g.relationship}</p>
+                              </div>
+                            )}
+                            <div>
+                              <p className="text-[10px] text-zinc-600 uppercase">Phone</p>
+                              <p className="text-emerald-400 font-semibold mt-0.5">{g.phone_no || '—'}</p>
+                            </div>
+                            {g.email && (
+                              <div>
+                                <p className="text-[10px] text-zinc-600 uppercase">Email</p>
+                                <p className="text-zinc-300 mt-0.5">{g.email}</p>
+                              </div>
+                            )}
+                            {g.occupation && (
+                              <div>
+                                <p className="text-[10px] text-zinc-600 uppercase">Occupation</p>
+                                <p className="text-zinc-300 mt-0.5">{g.occupation}</p>
+                              </div>
+                            )}
+                            {g.workplace && (
+                              <div>
+                                <p className="text-[10px] text-zinc-600 uppercase">Workplace</p>
+                                <p className="text-zinc-300 mt-0.5">{g.workplace}</p>
+                              </div>
+                            )}
+                            {g.national_id && (
+                              <div>
+                                <p className="text-[10px] text-zinc-600 uppercase">National ID</p>
+                                <p className="text-zinc-300 font-mono mt-0.5">{g.national_id}</p>
+                              </div>
+                            )}
+                            {g.physical_address && (
+                              <div className="sm:col-span-2">
+                                <p className="text-[10px] text-zinc-600 uppercase">Physical Address</p>
+                                <p className="text-zinc-300 mt-0.5">{g.physical_address}</p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-zinc-600 italic">
+                            Hakuna taarifa za mdhamini zilizopatikana.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Completed badge */}
                   {isComplete && (

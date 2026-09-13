@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Hash, LogOut, AtSign, Mail, X, Menu, ArrowLeft } from 'lucide-react';
+import { Hash, LogOut, AtSign, Mail, X, Menu, ArrowLeft, Phone } from 'lucide-react';
 import { supabase } from '@/lib/superbase';
 import { useRouter } from 'next/navigation';
 
@@ -107,6 +107,23 @@ export default function TopNav() {
           <h1 className="text-sm sm:text-xl font-bold tracking-wide whitespace-nowrap">
             Omar <span className="text-amber-400">microfinance</span>
           </h1>
+        </div>
+
+        {/* Developer Assistance — desktop only */}
+        <div className="hidden md:flex items-center gap-3 bg-neutral-900/50 border border-neutral-800 rounded-full px-4 py-2 text-sm font-medium">
+          <Mail size={14} className="text-amber-400 shrink-0" />
+          <span className="text-white">Email</span>
+          <span className="text-zinc-600">::</span>
+          <a href="mailto:marwakishery99@gmail.com" className="text-amber-400 hover:text-amber-300 transition">
+            marwakishery99@gmail.com
+          </a>
+          <span className="text-zinc-600">/</span>
+          <Phone size={14} className="text-amber-400 shrink-0" />
+          <span className="text-white">Phone</span>
+          <span className="text-zinc-600">::</span>
+          <a href="tel:+255752555005" className="text-amber-400 hover:text-amber-300 transition">
+            +255 752 555 005
+          </a>
         </div>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-3">
